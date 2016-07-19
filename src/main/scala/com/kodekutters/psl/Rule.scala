@@ -39,6 +39,11 @@ object Rule {
     * @return true if the label matches the rule pattern
     */
   private def isLabelMatch(pattern: String, label: String, patternIndex: Integer): Boolean = {
+    if (label == "ac" || label == "id") {
+      println(s"pattern -------> $pattern")
+      println(s"patternIndex -------> $patternIndex")
+      println(s"label -------> $label")
+    }
     if (pattern == null || pattern.isEmpty || label == null || label.isEmpty) false
     else if (pattern == Rule.WILDCARD && patternIndex > 0) true // Do not use the Wildcard rule for TLDs
     else pattern.equalsIgnoreCase(label)
@@ -82,6 +87,7 @@ case class Rule(pattern: String, exceptionRule: Boolean) {
         }
         if (matchOk) {
           val mtch = reversedMatchedLabels.reverse.mkString(".")
+          println(s"Matched OK for labels -------> $mtch")
           if (exceptionRule) Option(mtch.split('.').drop(1).mkString(".")) else Option(mtch)
         }
         else

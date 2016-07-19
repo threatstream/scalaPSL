@@ -73,10 +73,17 @@ final class PublicSuffixList(val ruleList: RuleList, val printFlag: Boolean) {
       val punycode = new PunyCodeAutoDecoder()
       val decodedDomain = punycode.decode(domain.toLowerCase)
       getPublicSuffix(decodedDomain) match {
-        case Some(suffix) if decodedDomain != suffix =>
+        case Some(suffix) =>
+          println(s"suffix ----> $suffix")
+          println(s"decodedDomain ----> $decodedDomain")
           val labels = decodedDomain.split('.')
-          val offset = labels.length - suffix.split('.').length - 1
+          var offset = labels.length - suffix.split('.').length - 1
+          if (decodedDomain == suffix) {
+            offset = 0
+          }
+          println(s"offset ----> $offset")
           val registrableDomain = labels.slice(offset, labels.length).mkString(".")
+          println(s"registrableDomain ----> $registrableDomain")
           Option(punycode.recode(registrableDomain))
 
         case _ => None
@@ -119,7 +126,9 @@ final class PublicSuffixList(val ruleList: RuleList, val printFlag: Boolean) {
   private def getPublicSuffix(domain: String): Option[String] = {
     val punycode = new PunyCodeAutoDecoder()
     val decodedDomain = punycode.recode(domain.toLowerCase)
-    ruleList.findRule(decodedDomain).flatMap(rule => rule.doMatch(decodedDomain).map(dmain => punycode.decode(dmain)))
+    val temp = ruleList.findRule(decodedDomain).flatMap(rule => rule.doMatch(decodedDomain).map(dmain => punycode.decode(dmain)))
+    println(s"psl ----> $temp")
+    temp
   }
 
   /**
@@ -162,8 +171,11 @@ final class PublicSuffixList(val ruleList: RuleList, val printFlag: Boolean) {
     else {
       val lvl = level - 1
       registrable(domain) match {
-        case None => None
+        case None => 
+          println("no registrable domain found!")
+          None
         case Some(regDomain) =>
+          println(s"regDomain ----------> $regDomain")
           val labels = regDomain.split('.')
           if (labels.length > lvl) Option(labels.dropRight(lvl).last) else None
       }
