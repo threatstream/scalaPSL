@@ -73,9 +73,12 @@ final class PublicSuffixList(val ruleList: RuleList, val printFlag: Boolean) {
       val punycode = new PunyCodeAutoDecoder()
       val decodedDomain = punycode.decode(domain.toLowerCase)
       getPublicSuffix(decodedDomain) match {
-        case Some(suffix) if decodedDomain != suffix =>
+        case Some(suffix) =>
           val labels = decodedDomain.split('.')
-          val offset = labels.length - suffix.split('.').length - 1
+          var offset = labels.length - suffix.split('.').length - 1
+          if (decodedDomain == suffix) {
+            offset = 0
+          }
           val registrableDomain = labels.slice(offset, labels.length).mkString(".")
           Option(punycode.recode(registrableDomain))
 
